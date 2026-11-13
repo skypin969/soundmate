@@ -179,6 +179,36 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnP4"
+                style="@style/Preset"
+                android:text="Bass" />
+
+            <Button
+                android:id="@+id/btnP5"
+                style="@style/Preset"
+                android:layout_marginStart="8dp"
+                android:text="Datar" />
+
+            <Button
+                android:id="@+id/btnP6"
+                style="@style/Preset"
+                android:layout_marginStart="8dp"
+                android:text="Kustom 1" />
+
+            <Button
+                android:id="@+id/btnP7"
+                style="@style/Preset"
+                android:layout_marginStart="8dp"
+                android:text="Kustom 2" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:background="@drawable/bg_card"
             android:orientation="vertical"
@@ -253,6 +283,27 @@
 
                 <TextView
                     style="@style/SeekName"
+                    android:labelFor="@+id/sbDialog"
+                    android:text="Penjernih dialog" />
+
+                <TextView
+                    android:id="@+id/txtDialog"
+                    style="@style/SeekVal"
+                    android:text="0%" />
+            </LinearLayout>
+
+            <SeekBar
+                android:id="@+id/sbDialog"
+                style="@style/Seek" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    style="@style/SeekName"
                     android:labelFor="@+id/sbVolume"
                     android:text="Penguat volume" />
 
@@ -266,5 +317,14 @@
                 android:id="@+id/sbVolume"
                 style="@style/Seek" />
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:lineSpacingExtra="2dp"
+            android:textColor="@color/text2"
+            android:textSize="12sp" />
     </LinearLayout>
 </ScrollView>
