@@ -20,7 +20,21 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      - name: Siapkan kunci rilis
+        env:
+          KEYSTORE_B64: ${{ secrets.SOUNDMATE_KEYSTORE_B64 }}
+          STORE_PASS: ${{ secrets.SOUNDMATE_STORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$STORE_PASS" ]; then
+            echo "Secret SOUNDMATE_KEYSTORE_B64 atau SOUNDMATE_STORE_PASSWORD belum diisi."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/soundmate-release.jks"
+
       - name: Build APK
+        env:
+          SOUNDMATE_KEYSTORE_PATH: ${{ runner.temp }}/soundmate-release.jks
+          SOUNDMATE_KEYSTORE_PASSWORD: ${{ secrets.SOUNDMATE_STORE_PASSWORD }}
         run: gradle assembleRelease --no-daemon
 
       - uses: actions/upload-artifact@v4

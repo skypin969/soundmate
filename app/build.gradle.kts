@@ -11,27 +11,31 @@ android {
         applicationId = "com.skypin.soundmate"
         minSdk = 26
         targetSdk = 34
-        versionCode = 7
-        versionName = "2.5"
+        versionCode = 8
+        versionName = "2.6"
     }
 
+    // Kunci rilis dibaca dari GitHub Secrets saat build, jadi tidak ada kunci atau password di kode.
+    // Kalau variabelnya tidak ada (build di komputer biasa), APK rilis dibuat tanpa tanda tangan.
     signingConfigs {
-        create("soundmate") {
-            storeFile = file("soundmate.jks")
-            storeType = "jks"
-            storePassword = "soundmate969"
-            keyAlias = "soundmate"
-            keyPassword = "soundmate969"
+        create("release") {
+            val ksPath = System.getenv("SOUNDMATE_KEYSTORE_PATH")
+            if (ksPath != null) {
+                storeFile = file(ksPath)
+                storeType = "pkcs12"
+                storePassword = System.getenv("SOUNDMATE_KEYSTORE_PASSWORD")
+                keyAlias = "soundmate"
+                keyPassword = System.getenv("SOUNDMATE_KEYSTORE_PASSWORD")
+            }
         }
     }
 
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("soundmate")
-        }
-        getByName("debug") {
-            signingConfig = signingConfigs.getByName("soundmate")
+            if (System.getenv("SOUNDMATE_KEYSTORE_PATH") != null) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
