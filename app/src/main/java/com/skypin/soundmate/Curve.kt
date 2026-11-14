@@ -3,10 +3,15 @@ package com.skypin.soundmate
 import kotlin.math.ln
 import kotlin.math.sqrt
 
-/** Menghitung kurva suara akhir dari equalizer, bass, dan penjernih dialog. */
+/** Menghitung kurva suara dari equalizer, bass, dan penjernih dialog. */
 object Curve {
-    // Tambahan dB per batang saat penggeser berada di 100%.
-    private val BASS = doubleArrayOf(10.0, 9.0, 6.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    // Tambahan dB per batang saat penggeser bass berada di 100%.
+    // Dorongan utama di 62 dan 125 Hz, bagian yang terdengar sebagai gelegar.
+    // 31 Hz dibuat kecil: speaker dan headset kecil hampir tidak memutarnya,
+    // dan energinya membuat pembatas menurunkan volume seluruh lagu.
+    private val BASS = doubleArrayOf(3.0, 9.0, 9.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+
+    // Tambahan dB per batang saat penjernih dialog berada di 100%.
     private val DIALOG = doubleArrayOf(0.0, 0.0, -1.5, -2.0, 1.0, 3.0, 5.0, 4.0, 1.0, 0.0)
 
     /** Batas atas tiap batang (Hz), dipakai mesin DynamicsProcessing. */
@@ -19,19 +24,15 @@ object Curve {
         val g = DoubleArray(Presets.BANDS)
         for (i in 0 until Presets.BANDS) {
             val v = p.band(i) + p.bass / 100.0 * BASS[i] + p.dialog / 100.0 * DIALOG[i]
-            g[i] = v.coerceIn(-12.0, 15.0)
+            g[i] = v.coerceIn(-12.0, 12.0)
         }
         return g
     }
 
-    /** Penguatan awal: naik oleh penguat volume, turun sedikit supaya suara tidak pecah. */
-    fun preampDb(p: Prefs, g: DoubleArray): Float {
-        var top = 0.0
-        for (v in g) if (v > top) top = v
-        return (p.volume / 100.0 * 9.0 - 0.4 * top).toFloat()
-    }
+    /** Penguat volume untuk mesin biasa, dalam millibel (0 sampai 6 dB). */
+    fun loudMb(p: Prefs): Int = p.volume * 6
 
-    /** Nilai dB kurva pada frekuensi tertentu. */
+    /** Nilai dB kurva pada frekuensi tertentu, dihitung dari batang terdekat. */
     fun at(g: DoubleArray, hz: Double): Double {
         val f = Presets.FREQ
         if (hz <= f[0]) return g[0]

@@ -398,7 +398,7 @@ class MainActivity : Activity() {
 
     private fun showAbout() {
         AlertDialog.Builder(this)
-            .setTitle("Soundmate 2.1")
+            .setTitle("Soundmate 2.2")
             .setMessage(
                 "Efek suara menyala otomatis saat headset atau speaker Bluetooth tersambung.\n\n" +
                     "Tiap perangkat Bluetooth menyimpan pengaturannya sendiri.\n\n" +
