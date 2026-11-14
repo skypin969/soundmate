@@ -11,8 +11,8 @@ android {
         applicationId = "com.skypin.soundmate"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "2.2"
+        versionCode = 7
+        versionName = "2.5"
     }
 
     signingConfigs {

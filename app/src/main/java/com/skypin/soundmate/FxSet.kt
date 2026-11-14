@@ -117,14 +117,16 @@ class FxSet(session: Int, allowDp: Boolean) {
     }
 
     /**
-     * Kompresor per pita. Pita bass hanya dikompres saat sangat keras, jadi dorongan bass tetap terasa.
-     * Penguat keluar (postGain) mengikuti penggeser volume.
+     * Kompresor per pita. Pita bass dikompres 4:1 supaya puncaknya tidak melewati batas.
+     * Penguat keluar pita bass ikut penggeser Bass (paling besar +3 dB), jadi bass lebih tebal
+     * tanpa menaikkan vokal. Pita tengah dan tinggi hanya mengikuti penggeser volume.
      */
     private fun mbcBand(i: Int, p: Prefs): DynamicsProcessing.MbcBand {
         val vol = p.volume / 100.0
+        val bassUp = p.bass / 100.0 * 3.0
         return when (i) {
             0 -> DynamicsProcessing.MbcBand(
-                true, MBC_CUT[0], 20f, 200f, 2f, -10f, 6f, -90f, 1f, 0f, (0.5 + vol * 5.0).toFloat()
+                true, MBC_CUT[0], 20f, 200f, 4f, -10f, 6f, -90f, 1f, 0f, (0.5 + vol * 5.0 + bassUp).toFloat()
             )
             1 -> DynamicsProcessing.MbcBand(
                 true, MBC_CUT[1], 15f, 150f, 1.5f, -14f, 6f, -90f, 1f, 0f, (1.5 + vol * 5.0).toFloat()

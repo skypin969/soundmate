@@ -24,7 +24,8 @@ object Presets {
         Preset("Game", intArrayOf(2, 3, 3, 0, -2, 0, 2, 3, 3, 2), 50, 80, 20, 35),
         Preset("Suara", intArrayOf(-3, -2, -1, 0, 1, 3, 4, 3, 1, 0), 0, 20, 80, 40),
         // Bass: gelegar di 62 dan 125 Hz, 500 Hz dipotong supaya tidak mendem, kejernihan di 2k sampai 8k.
-        Preset("Bass", intArrayOf(0, 0, 0, -1, -2, 0, 2, 2, 2, 1), 90, 25, 10, 55),
+        // Surround dan penguat volume 0 sesuai hasil tes. Penggeser Bass juga menambah penguat bass.
+        Preset("Bass", intArrayOf(0, 0, 0, -1, -2, 0, 2, 2, 2, 1), 100, 0, 10, 0),
         // Datar: tidak ada yang diubah, efek dimatikan.
         Preset("Datar", IntArray(BANDS), 0, 0, 0, 0)
     )
