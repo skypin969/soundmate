@@ -8,7 +8,9 @@ import android.content.Context
  */
 class Prefs(ctx: Context) {
     private val sp = ctx.getSharedPreferences("soundmate", Context.MODE_PRIVATE)
-    private val def = Presets.ALL[0]
+    /** Preset yang dipakai saat pertama kali dipasang: Bass. */
+    private val defPreset = Presets.ALL.indexOfFirst { it.name == "Bass" }.coerceAtLeast(0)
+    private val def = Presets.ALL[defPreset]
 
     var enabled: Boolean
         get() = sp.getBoolean("enabled", true)
@@ -27,7 +29,7 @@ class Prefs(ctx: Context) {
 
     /** Nomor preset yang dipilih, -1 kalau diatur manual. */
     var preset: Int
-        get() = sp.getInt(k("preset"), 0)
+        get() = sp.getInt(k("preset"), defPreset)
         set(v) { sp.edit().putInt(k("preset"), v).apply() }
 
     var bass: Int
@@ -101,4 +103,9 @@ class Prefs(ctx: Context) {
     var stSessions: Int
         get() = sp.getInt("st_sessions", 0)
         set(v) { sp.edit().putInt("st_sessions", v).apply() }
+
+    /** Hasil pemilihan suara Asli terakhir, ditampilkan di layar utama dan notifikasi. */
+    var stAsli: String
+        get() = sp.getString("st_asli", "") ?: ""
+        set(v) { sp.edit().putString("st_asli", v).apply() }
 }

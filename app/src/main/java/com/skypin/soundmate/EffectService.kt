@@ -29,6 +29,10 @@ import java.util.concurrent.Executors
 class EffectService : Service() {
 
     companion object {
+        /** Layanan yang sedang berjalan. Dipakai layanan Aksesibilitas untuk memperbarui notifikasi. */
+        @Volatile
+        var instance: EffectService? = null
+
         const val ACTION_APPLY = "com.skypin.soundmate.APPLY"
         const val ACTION_RELOAD = "com.skypin.soundmate.RELOAD"
         const val DUMP_PERMISSION = "android.permission.DUMP"
@@ -86,14 +90,10 @@ class EffectService : Service() {
         super.onCreate()
         prefs = Prefs(this)
         am = getSystemService(AudioManager::class.java)
+        instance = this
 
         createChannel()
-        val n = buildNotification()
-        if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
-        } else {
-            startForeground(NOTIF_ID, n)
-        }
+        goForeground()
 
         val filter = IntentFilter()
         filter.addAction(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION)
@@ -112,12 +112,15 @@ class EffectService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Dipanggil ulang setiap kali aplikasi atau BtReceiver membangunkan layanan, jadi harus tetap di latar depan.
+        goForeground()
         if (intent?.action == ACTION_RELOAD) setGlobal(prefs.global)
         applyAll()
         return START_STICKY
     }
 
     override fun onDestroy() {
+        instance = null
         destroyed = true
         handler.removeCallbacks(pollTask)
         exec.shutdownNow()
@@ -261,19 +264,38 @@ class EffectService : Service() {
         getSystemService(NotificationManager::class.java).createNotificationChannel(ch)
     }
 
+    /** Memperbarui teks notifikasi, misalnya setelah hasil pemilihan Asli berubah. */
+    fun updateNotification() {
+        getSystemService(NotificationManager::class.java).notify(NOTIF_ID, buildNotification())
+    }
+
+    /** Masuk ke mode latar depan dengan notifikasi terbaru. */
+    private fun goForeground() {
+        val n = buildNotification()
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(NOTIF_ID, n)
+        }
+    }
+
     private fun buildNotification(): Notification {
         val name = btName
-        val text = if (name != null) "Efek aktif: $name" else "Menunggu Bluetooth tersambung"
+        val base = if (name != null) "Efek aktif: $name" else "Menunggu Bluetooth tersambung"
+        val asli = prefs.stAsli
         val open = PendingIntent.getActivity(
             this, 0, Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        return Notification.Builder(this, CHANNEL)
+        val b = Notification.Builder(this, CHANNEL)
             .setSmallIcon(R.drawable.ic_notif)
             .setContentTitle("Soundmate")
-            .setContentText(text)
+            .setContentText(base)
             .setContentIntent(open)
             .setOngoing(true)
-            .build()
+        if (asli.isNotEmpty()) {
+            b.setStyle(Notification.BigTextStyle().bigText(base + "\n" + asli))
+        }
+        return b.build()
     }
 }

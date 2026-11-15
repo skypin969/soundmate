@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Soundmate</string>
+    <string name="a11y_label">Soundmate: pilih suara Asli</string>
+    <string name="a11y_desc">Saat Bluetooth tersambung, Soundmate membuka pengaturan suara dan memilih Asli. Soundmate tidak punya izin internet, jadi tidak ada data layar yang dikirim keluar.</string>
 </resources>

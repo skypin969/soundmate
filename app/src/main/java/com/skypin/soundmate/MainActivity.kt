@@ -1,6 +1,7 @@
 package com.skypin.soundmate
 
 import android.Manifest
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ClipData
@@ -16,7 +17,9 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.Gravity
+import android.view.accessibility.AccessibilityManager
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -44,6 +47,7 @@ class MainActivity : Activity() {
     private lateinit var txtFxTitle: TextView
     private lateinit var txtFxSub: TextView
     private lateinit var txtInfo: TextView
+    private lateinit var txtAsli: TextView
     private lateinit var swMaster: Switch
     private lateinit var sbBass: SeekBar
     private lateinit var sbSurround: SeekBar
@@ -91,6 +95,10 @@ class MainActivity : Activity() {
         txtFxTitle = findViewById(R.id.txtFxTitle)
         txtFxSub = findViewById(R.id.txtFxSub)
         txtInfo = findViewById(R.id.txtInfo)
+        txtAsli = findViewById(R.id.txtAsli)
+        txtAsli.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
         swMaster = findViewById(R.id.swMaster)
         sbBass = findViewById(R.id.sbBass)
         sbSurround = findViewById(R.id.sbSurround)
@@ -320,8 +328,41 @@ class MainActivity : Activity() {
         updateInfo()
     }
 
+    /** Keadaan layanan Aksesibilitas dan hasil pemilihan Asli terakhir. */
+    private fun updateAsli() {
+        if (!prefs.enabled) {
+            txtAsli.text = ""
+            txtAsli.isClickable = false
+            return
+        }
+        if (!asliServiceOn()) {
+            txtAsli.text = "Pilih suara Asli otomatis: belum aktif.\n" +
+                "Ketuk di sini, lalu nyalakan Soundmate di menu Aksesibilitas."
+            txtAsli.isClickable = true
+            txtAsli.setTextColor(getColor(R.color.text))
+            return
+        }
+        val head = if (SoundAccessibilityService.instance == null) {
+            "Pilih suara Asli otomatis: menunggu layanan"
+        } else {
+            "Pilih suara Asli otomatis: aktif"
+        }
+        val st = prefs.stAsli
+        txtAsli.text = if (st.isEmpty()) head else head + "\n" + st
+        txtAsli.isClickable = false
+        txtAsli.setTextColor(getColor(R.color.text2))
+    }
+
+    /** Memeriksa apakah Soundmate sudah dinyalakan di menu Aksesibilitas. */
+    private fun asliServiceOn(): Boolean {
+        val accMan = getSystemService(AccessibilityManager::class.java)
+        return accMan.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            .any { it.resolveInfo.serviceInfo.name == SoundAccessibilityService::class.java.name }
+    }
+
     /** Keterangan kecil di bawah layar, berguna untuk memeriksa apakah efek berjalan. */
     private fun updateInfo() {
+        updateAsli()
         if (!prefs.enabled) {
             txtInfo.text = ""
             return
@@ -398,9 +439,12 @@ class MainActivity : Activity() {
 
     private fun showAbout() {
         AlertDialog.Builder(this)
-            .setTitle("Soundmate 2.6")
+            .setTitle("Soundmate 2.7")
             .setMessage(
                 "Efek suara menyala otomatis saat headset atau speaker Bluetooth tersambung.\n\n" +
+                    "Saat Bluetooth tersambung, Soundmate membuka Pengaturan dan memilih suara Asli " +
+                    "lewat layanan Aksesibilitas. Soundmate tidak punya izin internet, " +
+                    "jadi isi layar tidak dikirim ke mana pun.\n\n" +
                     "Tiap perangkat Bluetooth menyimpan pengaturannya sendiri.\n\n" +
                     "Kustom 1 dan Kustom 2: tekan lama untuk menyimpan pengaturan sekarang, " +
                     "ketuk untuk memakainya lagi.\n\n" +

@@ -11,8 +11,8 @@ android {
         applicationId = "com.skypin.soundmate"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "2.6"
+        versionCode = 9
+        versionName = "2.7"
     }
 
     // Kunci rilis dibaca dari GitHub Secrets saat build, jadi tidak ada kunci atau password di kode.
